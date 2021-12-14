@@ -2,21 +2,26 @@
 
 namespace DAL;
 
-public class Task : StoreIndex
+public class Task
 {
+    private uint _id;
     private string _title = "";
     private string _description = "";
     private string _deadline = "";
-
+    private TaskStatus? _status;
     
     #region Regular Expressions
     public static string regTitle = "";
     public static string regDescription = "";
     public static string regDeadline = "";
-    #endregion  
-
+    #endregion
 
     #region Properties
+    public uint ID
+    {
+        get => _id;
+        set => _id = value;
+    }
     public string Title
     {
         get => _title;
@@ -31,6 +36,11 @@ public class Task : StoreIndex
     {
         get => _deadline;
         set => _deadline = Regex.IsMatch(value, regDeadline) ? value : throw new Exception();
+    }
+    public TaskStatus? Status
+    {
+        get => _status;
+        set => _status = value;
     }
     #endregion  
 }

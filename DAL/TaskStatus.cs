@@ -2,19 +2,23 @@
 
 namespace DAL;
 
-public class TaskStatus : StoreIndex
+public class TaskStatus
 {
+    private uint _id;
     private string _title = "";
     private string _description = "";
-
 
     #region Regular Expressions
     public static string regTitle = "";
     public static string regDescription = "";
-    #endregion  
-
+    #endregion
 
     #region Properties
+    public uint ID
+    {
+        get => _id;
+        set => _id = value;
+    }
     public string Title
     {
         get => _title;
