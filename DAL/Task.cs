@@ -8,12 +8,13 @@ public class Task
     private string _title = "";
     private string _description = "";
     private string _deadline = "";
-    private TaskStatus? _status;
+    private string _status = "";
     
     #region Regular Expressions
     public static string regTitle = "";
     public static string regDescription = "";
     public static string regDeadline = "";
+    public static string regStatus = "";
     #endregion
 
     #region Properties
@@ -37,10 +38,10 @@ public class Task
         get => _deadline;
         set => _deadline = Regex.IsMatch(value, regDeadline) ? value : throw new Exception();
     }
-    public TaskStatus? Status
+    public string Status
     {
         get => _status;
-        set => _status = value;
+        set => _status = Regex.IsMatch(value, regStatus) ? value : throw new Exception();
     }
     #endregion  
 }
