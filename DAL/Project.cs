@@ -12,15 +12,28 @@ public class Project
     #region Create
     public void AddTask(Task newTask)
     {
-        if (_tasks.Exists(task => task.ID == newTask.ID)) throw new Exception("This task already exists!");
+        if (_tasks.Exists(task => task.ID == newTask.ID)) throw new Exception();
 
         _tasks.Add(newTask);
+
+        Notify?.Invoke();
     }
     public void AddTeamMemberStatus(TeamMember newTeamMembers)
     {
-        if (_teamMembers.Exists(taskStatus => taskStatus.ID == newTeamMembers.ID)) throw new Exception("This task status already exists!");
+        if (_teamMembers.Exists(taskStatus => taskStatus.ID == newTeamMembers.ID)) throw new Exception();
 
         _teamMembers.Add(newTeamMembers);
+
+        Notify?.Invoke();
+    }
+    public void AddProjectDependency(uint taskID, uint teamMemberID)
+    {
+        if (_projectDependency.Exists(dependency => dependency.taskID == taskID && dependency.teamMemberID == teamMemberID))
+            throw new Exception();
+
+        _projectDependency.Add(new ProjectDependency(taskID, teamMemberID));
+
+        Notify?.Invoke();
     }
     #endregion
 
@@ -35,20 +48,24 @@ public class Project
     {
         Task? task = _tasks.Find(task => task.ID == updatedTask.ID);
 
-        if (task is null) throw new Exception("This task dosn't exists!");
+        if (task is null) throw new Exception();
 
         _tasks.Remove(task);
         _tasks.Add(updatedTask);
+
+        Notify?.Invoke();
     }
 
     public void EditTeamMember(TeamMember updatedTaeamMember)
     {
         TeamMember? teamMembar = _teamMembers.Find(teamMember => teamMember.ID == updatedTaeamMember.ID);
 
-        if (teamMembar is null) throw new Exception("This team membar dosn't exists!");
+        if (teamMembar is null) throw new Exception();
 
         _teamMembers.Remove(teamMembar);
         _teamMembers.Add(teamMembar);
+
+        Notify?.Invoke();
     }
 
     #endregion
@@ -60,6 +77,8 @@ public class Project
         if (record is not null) _projectDependency.Remove(record);
 
         _tasks.Remove(task);
+
+        Notify?.Invoke();
     }
     public void RemoveMemberTask(TeamMember teamMember)
     {
@@ -67,6 +86,17 @@ public class Project
         if (record is not null) _projectDependency.Remove(record);
 
         _teamMembers.Remove(teamMember);
+
+        Notify?.Invoke();
+    }
+    public void RemoveProjectDependency(uint taskID, uint teamMemberID)
+    {
+        if (!_projectDependency.Exists(dependency => dependency.taskID == taskID && dependency.teamMemberID == teamMemberID))
+            throw new Exception();
+
+        _projectDependency.Remove(new ProjectDependency(taskID, teamMemberID));
+
+        Notify?.Invoke();
     }
     #endregion
 }
