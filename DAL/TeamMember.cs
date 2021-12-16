@@ -26,12 +26,12 @@ public class TeamMember
         get => _firstName;
         set => _firstName = Regex.IsMatch(value, regFirstName) ? value : throw new Exception();
     }
-    public string Description
+    public string LastName
     {
         get => _lastName;
         set => _lastName = Regex.IsMatch(value, regLastName) ? value : throw new Exception();
     }
-    public string Deadline
+    public string Email
     {
         get => _email;
         set => _email = Regex.IsMatch(value, regEmail) ? value : throw new Exception();

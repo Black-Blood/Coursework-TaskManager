@@ -7,7 +7,7 @@ public class Project
 
     private readonly List<Task> _tasks = new();
     private readonly List<TeamMember> _teamMembers = new();
-    private readonly List<ProjectDependency> _projectDependency = new();
+    private readonly List<TaskTeamMember> _taskTeamMembers = new();
 
     #region Create
     public void AddTask(Task newTask)
@@ -18,7 +18,7 @@ public class Project
 
         Notify?.Invoke();
     }
-    public void AddTeamMemberStatus(TeamMember newTeamMembers)
+    public void AddTeamMember(TeamMember newTeamMembers)
     {
         if (_teamMembers.Exists(taskStatus => taskStatus.ID == newTeamMembers.ID)) throw new Exception();
 
@@ -26,12 +26,12 @@ public class Project
 
         Notify?.Invoke();
     }
-    public void AddProjectDependency(uint taskID, uint teamMemberID)
+    public void AddTaskTeamMember(uint taskID, uint teamMemberID)
     {
-        if (_projectDependency.Exists(dependency => dependency.taskID == taskID && dependency.teamMemberID == teamMemberID))
+        if (_taskTeamMembers.Exists(dependency => dependency.taskID == taskID && dependency.teamMemberID == teamMemberID))
             throw new Exception();
 
-        _projectDependency.Add(new ProjectDependency(taskID, teamMemberID));
+        _taskTeamMembers.Add(new TaskTeamMember(taskID, teamMemberID));
 
         Notify?.Invoke();
     }
@@ -40,11 +40,11 @@ public class Project
     #region Read
     public List<Task> Tasks => _tasks;
     public List<TeamMember> TeamMembers => _teamMembers;
-    public List<ProjectDependency> ProjectDependencys => _projectDependency;
+    public List<TaskTeamMember> TaskTeamMembers => _taskTeamMembers;
     #endregion
 
     #region Update
-    public void EditTask(Task updatedTask)
+    public void UpdateTask(Task updatedTask)
     {
         Task? task = _tasks.Find(task => task.ID == updatedTask.ID);
 
@@ -56,7 +56,7 @@ public class Project
         Notify?.Invoke();
     }
 
-    public void EditTeamMember(TeamMember updatedTaeamMember)
+    public void UpdateTeamMember(TeamMember updatedTaeamMember)
     {
         TeamMember? teamMembar = _teamMembers.Find(teamMember => teamMember.ID == updatedTaeamMember.ID);
 
@@ -73,42 +73,30 @@ public class Project
     #region Delete
     public void RemoveTask(Task task)
     {
-        ProjectDependency? record = _projectDependency.Find(record => record.taskID == task.ID);
-        if (record is not null) _projectDependency.Remove(record);
+        TaskTeamMember? record = _taskTeamMembers.Find(record => record.taskID == task.ID);
+        if (record is not null) _taskTeamMembers.Remove(record);
 
         _tasks.Remove(task);
 
         Notify?.Invoke();
     }
-    public void RemoveMemberTask(TeamMember teamMember)
+    public void RemoveMember(TeamMember teamMember)
     {
-        ProjectDependency? record = _projectDependency.Find(record => record.teamMemberID == teamMember.ID);
-        if (record is not null) _projectDependency.Remove(record);
+        TaskTeamMember? record = _taskTeamMembers.Find(record => record.teamMemberID == teamMember.ID);
+        if (record is not null) _taskTeamMembers.Remove(record);
 
         _teamMembers.Remove(teamMember);
 
         Notify?.Invoke();
     }
-    public void RemoveProjectDependency(uint taskID, uint teamMemberID)
+    public void RemoveTaskTeamMember(uint taskID, uint teamMemberID)
     {
-        if (!_projectDependency.Exists(dependency => dependency.taskID == taskID && dependency.teamMemberID == teamMemberID))
+        if (!_taskTeamMembers.Exists(dependency => dependency.taskID == taskID && dependency.teamMemberID == teamMemberID))
             throw new Exception();
 
-        _projectDependency.Remove(new ProjectDependency(taskID, teamMemberID));
+        _taskTeamMembers.Remove(new TaskTeamMember(taskID, teamMemberID));
 
         Notify?.Invoke();
     }
     #endregion
-}
-
-public class ProjectDependency
-{
-    public uint taskID;
-    public uint teamMemberID;
-
-    public ProjectDependency(uint taskID, uint teamMemberID)
-    {
-        this.taskID = taskID;
-        this.teamMemberID = teamMemberID;
-    }
 }

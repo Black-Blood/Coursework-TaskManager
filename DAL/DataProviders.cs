@@ -69,7 +69,7 @@ namespace DAL
             serializer.WriteObject(fs, data);
         }
 
-        public object Read(string fileName, Type[] dataTypes)
+        public object? Read(string fileName, Type[] dataTypes)
         {
             using FileStream fs = File.Open(fileName, FileMode.Open);
 
@@ -79,4 +79,3 @@ namespace DAL
         }
     }
 }
-
