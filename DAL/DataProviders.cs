@@ -6,28 +6,37 @@ namespace DAL
 {
     public interface IDataProvider
     {
-        public void Write(string fileName, object data, Type[] dataTypes);
+        protected static Type[] _serializationTypes =
+        {
+            typeof(Project),
+            typeof(Task),
+            typeof(TaskStatus),
+            typeof(DateTime),
+            typeof(TeamMember),
+        };
 
-        public object? Read(string fileName, Type[] dataTypes);
+        public void Write(string fileName, object data);
+
+        public object? Read(string fileName);
     }
 
     public class JSONDataProvider : IDataProvider
     {
-        public void Write(string fileName, object data, Type[] dataTypes)
+        public void Write(string fileName, object data)
         {
             File.Delete(fileName);
             using FileStream fs = File.Open(fileName, FileMode.OpenOrCreate);
 
-            DataContractJsonSerializer serializer = new(typeof(object), dataTypes);
+            DataContractJsonSerializer serializer = new(typeof(object), IDataProvider._serializationTypes);
 
             serializer.WriteObject(fs, data);
         }
 
-        public object? Read(string fileName, Type[] dataTypes)
+        public object? Read(string fileName)
         {
             using FileStream fs = File.Open(fileName, FileMode.Open);
 
-            DataContractJsonSerializer serializer = new(typeof(object), dataTypes);
+            DataContractJsonSerializer serializer = new(typeof(object), IDataProvider._serializationTypes);
 
             return serializer.ReadObject(fs);
         }
@@ -35,23 +44,23 @@ namespace DAL
 
     public class XMLDataProvider : IDataProvider
     {
-        public void Write(string fileName, object data, Type[] dataTypes)
+        public void Write(string fileName, object data)
         {
             File.Delete(fileName);
             using FileStream fs = File.Open(fileName, FileMode.OpenOrCreate);
             using XmlDictionaryWriter writer = XmlDictionaryWriter.CreateBinaryWriter(fs);
 
-            DataContractSerializer serializer = new(typeof(object), dataTypes);
+            DataContractSerializer serializer = new(typeof(object), IDataProvider._serializationTypes);
 
             serializer.WriteObject(fs, data);
         }
 
-        public object? Read(string fileName, Type[] dataTypes)
+        public object? Read(string fileName)
         {
             using FileStream fs = File.Open(fileName, FileMode.Open);
             using XmlDictionaryReader reader = XmlDictionaryReader.CreateBinaryReader(fs, XmlDictionaryReaderQuotas.Max);
 
-            DataContractSerializer serializer = new(typeof(object), dataTypes);
+            DataContractSerializer serializer = new(typeof(object), IDataProvider._serializationTypes);
 
             return serializer.ReadObject(fs);
         }
@@ -59,21 +68,21 @@ namespace DAL
 
     public class BinaryDataProvider : IDataProvider
     {
-        public void Write(string fileName, object data, Type[] dataTypes)
+        public void Write(string fileName, object data)
         {
             File.Delete(fileName);
             using FileStream fs = File.Open(fileName, FileMode.OpenOrCreate);
 
-            DataContractSerializer serializer = new(typeof(object), dataTypes);
+            DataContractSerializer serializer = new(typeof(object), IDataProvider._serializationTypes);
 
             serializer.WriteObject(fs, data);
         }
 
-        public object? Read(string fileName, Type[] dataTypes)
+        public object? Read(string fileName)
         {
             using FileStream fs = File.Open(fileName, FileMode.Open);
 
-            DataContractSerializer serializer = new(typeof(object), dataTypes);
+            DataContractSerializer serializer = new(typeof(object), IDataProvider._serializationTypes);
 
             return serializer.ReadObject(fs);
         }

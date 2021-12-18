@@ -6,7 +6,7 @@ public class TeamMemberController
 {
     private Project _project;
 
-    public TeamMemberController(Project project)
+    internal TeamMemberController(Project project)
     {
         _project = project;
     }
@@ -66,28 +66,17 @@ public class TeamMemberController
         _project.RemoveMember(teamMember);
     }
 
-    public string GetTeamMemberInfo(uint teamMemberID)
+    public TeamMemberView GetTeamMemberInfo(uint teamMemberID)
     {
         TeamMember? teamMember = _project.TeamMembers.Find(teamMember => teamMember.ID == teamMemberID);
 
         if (teamMember is null) throw new Exception();
 
-        return PrepareTeamMemberInformation(teamMember);
+        return new TeamMemberView(teamMember);
     }
 
-    public List<string> GetAllTeamMemberInfo()
+    public List<TeamMemberView> GetAllTeamMemberInfo()
     {
-        return _project.TeamMembers.ConvertAll(PrepareTeamMemberInformation);
-    }
-
-    private string PrepareTeamMemberInformation(TeamMember teamMember)
-    {
-        string result = "";
-
-        result += $"{teamMember.ID.ToString().PadLeft(3, '0')} | ";
-        result += $"{(teamMember.FirstName + teamMember.LastName).PadRight(50, ' ')} | ";
-        result += $"{teamMember.Email}";
-
-        return result;
+        return _project.TeamMembers.ConvertAll(teamMember => new TeamMemberView(teamMember));
     }
 }

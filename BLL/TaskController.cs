@@ -1,4 +1,5 @@
 ﻿using DAL;
+using System.Globalization;
 
 namespace BLL;
 
@@ -6,12 +7,12 @@ public class TaskController
 {
     private Project _project;
 
-    public TaskController(Project project)
+    internal TaskController(Project project)
     {
         _project = project;
     }
 
-    public void CreateTask(string title, string deadline, string description, string status)
+    public void CreateTask(string title, string deadline, string description)
     {
         try
         {
@@ -19,14 +20,14 @@ public class TaskController
 
             uint id = Convert.ToUInt32(_project.Tasks.Count);
             for (; true; id++)
-                if (!_project.Tasks.Exists(task => task.ID == id))
+                if (!_project.Tasks.Exists(t => t.ID == id))
                     break;
 
             task.ID = id;
             task.Title = title;
             task.Description = description;
-            task.Deadline = deadline;
-            task.Status = status;
+            task.Deadline = DateTime.ParseExact(deadline, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            task.Status = new();
 
             _project.AddTask(task);
         }
@@ -37,18 +38,18 @@ public class TaskController
 
     }
 
-    public void EditTask(uint taskID, string? title, string? deadline, string? description, string? status)
+    public void EditTask(uint taskID, string? title, string? deadline, string? status, string? description)
     {
         try
         {
-            DAL.Task? task = _project.Tasks.Find(task => task.ID == taskID);
+            DAL.Task? task = _project.Tasks.Find(t => t.ID == taskID);
 
             if (task is null) throw new Exception();
 
             if (title is not null) task.Title = title;
-            if (deadline is not null) task.Deadline = deadline;
+            if (deadline is not null) task.Deadline = DateTime.Parse(deadline);
             if (description is not null) task.Description = description;
-            if (status is not null) task.Status = status;
+            if (status is not null) task.Status.CurrentStatus = Enum.Parse<DAL.TaskStatus.StatusType>(status);
 
             _project.UpdateTask(task);
         }
@@ -61,38 +62,25 @@ public class TaskController
 
     public void DeleteTask(uint taskID)
     {
-        DAL.Task? task = _project.Tasks.Find(task => task.ID == taskID);
+        DAL.Task? task = _project.Tasks.Find(t => t.ID == taskID);
         
         if(task is null) throw new Exception();
 
         _project.RemoveTask(task);
     }
 
-    public string GetTaskInfo(uint taskID)
+    public TaskView GetTaskInfo(uint taskID)
     {
 
-        DAL.Task? task = _project.Tasks.Find(task => task.ID == taskID);
+        DAL.Task? task = _project.Tasks.Find(t => t.ID == taskID);
 
         if (task is null) throw new Exception();
 
-        return PrepareTaskInformation(task);
+        return new TaskView(task);
     }
 
-    public List<string> GetAllTaskInfo()
+    public List<TaskView> GetAllTaskInfo()
     {
-        return _project.Tasks.ConvertAll(PrepareTaskInformation);
-    }
-
-    private string PrepareTaskInformation(DAL.Task task)
-    {
-        string result = "";
-
-        result += $"{task.ID.ToString().PadLeft(3, '0')} | ";
-        result += $"{task.Title.PadRight(50, ' ')} | ";
-        result += $"{task.Deadline.PadRight(10, ' ')} | ";
-        result += $"{task.Description}";
-
-        return result;
-
+        return _project.Tasks.ConvertAll(task => new TaskView(task));
     }
 }

@@ -1,136 +1,133 @@
 ﻿using DAL;
 
+namespace BLL;
+
 public class SearchController
 {
     private Project _project;
 
-    public SearchController(Project project)
+    internal SearchController(Project project)
     {
         _project = project;
     }
 
     public enum SearchTeamMemberBy
     {
-        FirstName,
-        LastName,
-        Email,
-        ID,
-        All
+        All = 0,
+        ID = 1,
+        Email = 2,
+        Name = 3
     }
 
     public enum SearchTaskBy
     {
-        Name,
-        Deadline,
+        Title,
         Description,
         ID,
+        Status,
+        Deadline,
         All
     }
 
-    public List<TeamMember> SearchTeamMember(string searchString, SearchTeamMemberBy searchType)
+    public List<TeamMemberView> SearchTeamMember(string searchString, SearchTeamMemberBy searchType)
     {
+        List<TeamMember> teamMembers = new();
+
         switch (searchType)
         {
-            case SearchTeamMemberBy.FirstName:
-                return _project.TeamMembers.FindAll(
+            case SearchTeamMemberBy.Name:
+                teamMembers = _project.TeamMembers.FindAll(
                     teamMember =>
-                        teamMember.FirstName.Contains(searchString) ||
-                        searchString.Contains(teamMember.FirstName)
+                        (teamMember.FirstName + " " + teamMember.LastName).Contains(searchString)
                 );
+                break;
 
-            case SearchTeamMemberBy.LastName:
-                return _project.TeamMembers.FindAll(
-                    teamMember =>
-                        teamMember.LastName.Contains(searchString) ||
-                        searchString.Contains(teamMember.LastName)
-                );
 
             case SearchTeamMemberBy.Email:
-                return _project.TeamMembers.FindAll(
+                teamMembers = _project.TeamMembers.FindAll(
                     teamMember =>
                         teamMember.Email.Contains(searchString) ||
                         searchString.Contains(teamMember.Email)
                 );
+                break;
 
             case SearchTeamMemberBy.ID:
-                return _project.TeamMembers.FindAll(
+                teamMembers = _project.TeamMembers.FindAll(
                     teamMember =>
                        teamMember.ID.ToString().Contains(searchString) ||
                        searchString.Contains(teamMember.ID.ToString())
                 );
+                break;
 
             case SearchTeamMemberBy.All:
-                List<TeamMember> result = new();
+                List<TeamMemberView> result = new();
 
-                result.AddRange(SearchTeamMember(searchString, SearchTeamMemberBy.FirstName));
-                result.AddRange(SearchTeamMember(searchString, SearchTeamMemberBy.LastName));
+                result.AddRange(SearchTeamMember(searchString, SearchTeamMemberBy.Name));
                 result.AddRange(SearchTeamMember(searchString, SearchTeamMemberBy.Email));
                 result.AddRange(SearchTeamMember(searchString, SearchTeamMemberBy.ID));
 
-                return result;
-
+                return result.Distinct().ToList();
         }
 
-        throw new Exception();
+        return teamMembers.ConvertAll(teamMember => new TeamMemberView(teamMember));
     }
 
-    public List<DAL.Task> SearchTask(string searchString, SearchTaskBy searchType)
+    public List<TaskView> SearchTask(string searchString, SearchTaskBy searchType)
     {
+        List<DAL.Task> tasks = new();
+
         switch (searchType)
         {
-            case SearchTaskBy.Name:
-                return _project.Tasks.FindAll(
+            case SearchTaskBy.Title:
+                tasks = _project.Tasks.FindAll(
                     task =>
                         task.Title.Contains(searchString) ||
                         searchString.Contains(task.Title)
                 );
-
-            case SearchTaskBy.Deadline:
-                return _project.Tasks.FindAll(
-                    task =>
-                        task.Deadline.Contains(searchString) ||
-                        searchString.Contains(task.Deadline)
-                );
+                break;
 
             case SearchTaskBy.Description:
-                return _project.Tasks.FindAll(
+                tasks = _project.Tasks.FindAll(
                     task =>
                         task.Description.Contains(searchString) ||
                         searchString.Contains(task.Description)
                 );
+                break;
 
             case SearchTaskBy.ID:
-                return _project.Tasks.FindAll(
+                tasks = _project.Tasks.FindAll(
                     task =>
                        task.ID.ToString().Contains(searchString) ||
                        searchString.Contains(task.ID.ToString())
                 );
+                break;
+
+            case SearchTaskBy.Deadline:
+                tasks = _project.Tasks.FindAll(
+                    task =>
+                       task.Deadline.ToString().Contains(searchString) ||
+                       searchString.Contains(task.Deadline.ToString())
+                );
+                break;
+
+            case SearchTaskBy.Status:
+                tasks = _project.Tasks.FindAll(
+                    task =>
+                        task.Status.ToString().Contains(searchString)
+                );
+                break;
 
             case SearchTaskBy.All:
-                List<DAL.Task> result = new();
+                List<TaskView> result = new();
 
-                result.AddRange(SearchTask(searchString, SearchTaskBy.Name));
+                result.AddRange(SearchTask(searchString, SearchTaskBy.Title));
                 result.AddRange(SearchTask(searchString, SearchTaskBy.Deadline));
                 result.AddRange(SearchTask(searchString, SearchTaskBy.Description));
                 result.AddRange(SearchTask(searchString, SearchTaskBy.ID));
 
-                return result;
+                return result.Distinct().ToList();
         }
 
-        throw new Exception();
-    }
-
-    public List<TaskTeamMember> SearchAssignedTasks(uint teamMemberID)
-    {
-        return _project.TaskTeamMembers.FindAll(
-            assigned => assigned.teamMemberID == teamMemberID
-        );
-    }
-
-    public List<TaskTeamMember> SearchAssignedTeamMembers(uint taskID)
-    {
-        return _project.TaskTeamMembers.FindAll(
-            assigned => assigned.taskID == taskID
-        );
+        return tasks.ConvertAll(task => new TaskView(task));
     }
 }

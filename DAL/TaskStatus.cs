@@ -12,6 +12,10 @@ public class TaskStatus
     private StatusType _currentStatus = StatusType.New;
     private List<StatusType> _history = new();
 
-    public StatusType CurrentStatus => _currentStatus;
+    public StatusType CurrentStatus
+    {
+        get => _currentStatus;
+        set => _history.Add(_currentStatus = value);
+    }
     public List<StatusType> History => _history;
 }
