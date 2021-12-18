@@ -1,12 +1,16 @@
 ﻿namespace DAL;
+
 public class TaskTeamMember
 {
-    public uint taskID;
-    public uint teamMemberID;
+    private uint _taskID;
+    private uint _teamMemberID;
+
+    public uint TaskID => _taskID;
+    public uint TeamMemberID => _teamMemberID;
 
     public TaskTeamMember(uint taskID, uint teamMemberID)
     {
-        this.taskID = taskID;
-        this.teamMemberID = teamMemberID;
+        _taskID = taskID;
+        _taskID = teamMemberID;
     }
 }

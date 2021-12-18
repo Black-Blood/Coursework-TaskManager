@@ -10,9 +10,9 @@ public class TeamMember
     private string _email = "";
 
     #region Regular Expressions
-    public static string regFirstName = "";
-    public static string regLastName = "";
-    public static string regEmail = "";
+    private readonly static string _regFirstName = "";
+    private readonly static string _regLastName = "";
+    private readonly static string _regEmail = "";
     #endregion
 
     #region Properties
@@ -24,17 +24,17 @@ public class TeamMember
     public string FirstName
     {
         get => _firstName;
-        set => _firstName = Regex.IsMatch(value, regFirstName) ? value : throw new Exception();
+        set => _firstName = Regex.IsMatch(value, _regFirstName) ? value : throw new Exception();
     }
     public string LastName
     {
         get => _lastName;
-        set => _lastName = Regex.IsMatch(value, regLastName) ? value : throw new Exception();
+        set => _lastName = Regex.IsMatch(value, _regLastName) ? value : throw new Exception();
     }
     public string Email
     {
         get => _email;
-        set => _email = Regex.IsMatch(value, regEmail) ? value : throw new Exception();
+        set => _email = Regex.IsMatch(value, _regEmail) ? value : throw new Exception();
     }
     #endregion  
 }
