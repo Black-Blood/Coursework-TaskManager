@@ -5,7 +5,7 @@ namespace BLL;
 
 public class TaskController
 {
-    private Project _project;
+    private readonly Project _project;
 
     internal TaskController(Project project)
     {
@@ -14,57 +14,44 @@ public class TaskController
 
     public void CreateTask(string title, string deadline, string description)
     {
-        try
-        {
-            DAL.Task task = new();
+        DAL.Task task = new();
 
-            uint id = Convert.ToUInt32(_project.Tasks.Count);
-            for (; true; id++)
-                if (!_project.Tasks.Exists(t => t.ID == id))
-                    break;
+        uint id = Convert.ToUInt32(_project.Tasks.Count);
+        for (; true; id++)
+            if (!_project.Tasks.Exists(t => t.ID == id))
+                break;
 
-            task.ID = id;
-            task.Title = title;
-            task.Description = description;
-            task.Deadline = DateTime.ParseExact(deadline, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
-            task.Status = new();
+        task.ID = id;
+        task.Title = title;
+        task.Description = description;
+        task.Deadline = DateTime.ParseExact(deadline, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+        task.Status = new();
 
-            _project.AddTask(task);
-        }
-        catch
-        {
+        _project.AddTask(task);
 
-        }
 
     }
 
-    public void EditTask(uint taskID, string? title, string? deadline, string? status, string? description)
+    public void EditTask(uint taskID, string title = "", string deadline = "", string status = "", string description = "")
     {
-        try
-        {
-            DAL.Task? task = _project.Tasks.Find(t => t.ID == taskID);
+        DAL.Task? task = _project.Tasks.Find(t => t.ID == taskID);
 
-            if (task is null) throw new Exception();
+        if (task is null) throw new Exception("No such task");
 
-            if (title is not null) task.Title = title;
-            if (deadline is not null) task.Deadline = DateTime.Parse(deadline);
-            if (description is not null) task.Description = description;
-            if (status is not null) task.Status.CurrentStatus = Enum.Parse<DAL.TaskStatus.StatusType>(status);
+        if (title is not "") task.Title = title;
+        if (deadline is not "") task.Deadline = DateTime.Parse(deadline);
+        if (description is not "") task.Description = description;
+        if (status is not "") task.Status.CurrentStatus = Enum.Parse<DAL.TaskStatus.StatusType>(status);
 
-            _project.UpdateTask(task);
-        }
-        catch
-        {
-
-        }
+        _project.UpdateTask(task);
 
     }
 
     public void DeleteTask(uint taskID)
     {
         DAL.Task? task = _project.Tasks.Find(t => t.ID == taskID);
-        
-        if(task is null) throw new Exception();
+
+        if (task is null) throw new Exception("No such task");
 
         _project.RemoveTask(task);
     }
@@ -74,7 +61,7 @@ public class TaskController
 
         DAL.Task? task = _project.Tasks.Find(t => t.ID == taskID);
 
-        if (task is null) throw new Exception();
+        if (task is null) throw new Exception("No such task");
 
         return new TaskView(task);
     }

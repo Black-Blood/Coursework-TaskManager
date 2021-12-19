@@ -4,7 +4,7 @@ using DAL;
 
 public class TeamMemberController
 {
-    private Project _project;
+    private readonly Project _project;
 
     internal TeamMemberController(Project project)
     {
@@ -42,7 +42,7 @@ public class TeamMemberController
         {
             TeamMember? teamMember = _project.TeamMembers.Find(teamMember => teamMember.ID == teamMemberID);
 
-            if (teamMember is null) throw new Exception();
+            if (teamMember is null) throw new Exception("No such team member");
 
             if (firstName is not null) teamMember.FirstName = firstName;
             if (lastName is not null) teamMember.LastName = lastName;
@@ -61,7 +61,7 @@ public class TeamMemberController
     {
         TeamMember? teamMember = _project.TeamMembers.Find(teamMember => teamMember.ID == teamMemberID);
 
-        if (teamMember is null) throw new Exception();
+        if (teamMember is null) throw new Exception("No such team member");
 
         _project.RemoveMember(teamMember);
     }
@@ -70,7 +70,7 @@ public class TeamMemberController
     {
         TeamMember? teamMember = _project.TeamMembers.Find(teamMember => teamMember.ID == teamMemberID);
 
-        if (teamMember is null) throw new Exception();
+        if (teamMember is null) throw new Exception("No such team member");
 
         return new TeamMemberView(teamMember);
     }

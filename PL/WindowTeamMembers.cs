@@ -10,7 +10,7 @@ internal class WindowTeamMembers
         new("Add member", AddMember),
         new("Edit member", EditMember),
         new("Delete member", DeleteMember),
-        new("Show all members", ShowAllMembersInfo),
+        new("Get all members", GetAllMembersInfo),
     };
 
     internal static void AddMember()
@@ -19,24 +19,24 @@ internal class WindowTeamMembers
 
         string firstName = WindowManager.GetData(
             message: "First name",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Only letters (from 3 to 10 symbols)",
+            (inputData) => Regex.IsMatch(inputData, @"^[a-zA-Z]{3,10}$")
         );
 
         string lastName = WindowManager.GetData(
             message: "Last name",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Only letters (from 3 to 10 symbols)",
+            (inputData) => Regex.IsMatch(inputData, @"^[a-zA-Z]{3,10}$")
         );
 
         string email = WindowManager.GetData(
             message: "Email",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Enter valid email",
+            (inputData) => Regex.IsMatch(inputData, @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")
         );
 
 
-        WindowProject.controller.teamMemberController.CreateTeamMember(firstName, lastName, email);
+        WindowProject.teamMemberController.CreateTeamMember(firstName, lastName, email);
         WindowProject.ManageProject();
     }
 
@@ -46,29 +46,29 @@ internal class WindowTeamMembers
 
         uint id = uint.Parse(WindowManager.GetData(
             message: "Team member ID",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Only numbers",
+            (inputData) => Regex.IsMatch(inputData, @"^\d{1,}$")
         ));
 
         string firstName = WindowManager.GetData(
             message: "First name",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Only letters (from 3 to 10 symbols)",
+            (inputData) => Regex.IsMatch(inputData, @"^[a-zA-Z]{3,10}$")
         );
 
         string lastName = WindowManager.GetData(
             message: "Last name",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Only letters (from 3 to 10 symbols)",
+            (inputData) => Regex.IsMatch(inputData, @"^[a-zA-Z]{3,10}$")
         );
 
         string email = WindowManager.GetData(
             message: "Email",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Enter valid email",
+            (inputData) => Regex.IsMatch(inputData, @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")
         );
 
-        WindowProject.controller.teamMemberController.EditTeamMember(id, firstName, lastName, email);
+        WindowProject.teamMemberController.EditTeamMember(id, firstName, lastName, email);
 
         WindowProject.ManageProject();
     }
@@ -79,43 +79,44 @@ internal class WindowTeamMembers
 
         uint id = uint.Parse(WindowManager.GetData(
             message: "Team member ID",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Only numbers",
+            (inputData) => Regex.IsMatch(inputData, @"^\d{1,}$")
         ));
 
-        WindowProject.controller.teamMemberController.DeleteTeamMember(id);
+        WindowProject.teamMemberController.DeleteTeamMember(id);
 
         WindowProject.ManageProject();
     }
 
-    internal static void ShowAllMembersInfo()
+    internal static void GetAllMembersInfo()
     {
         WindowManager.ShowTitle("All members");
 
-        List<TeamMemberView> result = WindowProject.controller.teamMemberController.GetAllTeamMemberInfo();
+        List<TeamMemberView> result = WindowProject.teamMemberController.GetAllTeamMemberInfo();
 
-        result.Sort((x, y) => Convert.ToInt32(x.ID) - Convert.ToInt32(y.ID));
+        ShowTeamMemberInfo(result);
+    }
+
+    internal static void ShowTeamMemberInfo(List<TeamMemberView> views)
+    {
+        views.Sort((x, y) => Convert.ToInt32(x.ID) - Convert.ToInt32(y.ID));
 
         string tableHeader = $" ID  | ";
-        tableHeader += $"{"Full Name".PadRight(20, ' ')} | ";
+        tableHeader += $"{"Full Name",-20} | ";
         tableHeader += $"Email";
         WindowManager.ShowMessage(tableHeader);
 
-        foreach (TeamMemberView view in result)
+        foreach (TeamMemberView view in views)
         {
-            string line = PrepareTeamMemberInformation(view);
+            string line = "";
+            line += $"{view.ID.ToString().PadLeft(4, '0')} | ";
+            line += $"{view.FirstName + " " + view.LastName,-20} | ";
+            line += $"{view.Email}";
             WindowManager.ShowMessage(line);
         }
-    }
 
-    internal static string PrepareTeamMemberInformation(TeamMemberView teamMember)
-    {
-        string result = "";
+        Console.ReadKey();
 
-        result += $"{teamMember.ID.ToString().PadLeft(4, '0')} | ";
-        result += $"{(teamMember.FirstName + " " + teamMember.LastName).PadRight(20, ' ')} | ";
-        result += $"{teamMember.Email}";
-
-        return result;
+        WindowProject.ManageProject();
     }
 }

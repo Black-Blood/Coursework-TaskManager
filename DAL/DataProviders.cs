@@ -6,11 +6,12 @@ namespace DAL
 {
     public interface IDataProvider
     {
-        protected static Type[] _serializationTypes =
+        protected readonly static Type[] _serializationTypes =
         {
             typeof(Project),
             typeof(Task),
             typeof(TaskStatus),
+            typeof(TaskTeamMember),
             typeof(DateTime),
             typeof(TeamMember),
         };

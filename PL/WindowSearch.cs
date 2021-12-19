@@ -2,71 +2,69 @@
 
 namespace PL;
 
-internal static class WindowSearch
+internal static class WindowSearchAndFiltering
 {
-    internal static KeyValuePair<string, WindowManager.MenuMethod>[] MenuManageSearch =
+    internal static KeyValuePair<string, WindowManager.MenuMethod>[] MenuManageSearchAndFiltering =
     {
-        new("Search task", SearchTask),
-        new("Search team member", SearchTeamMember),
-        //new("Search team members by task id",),
-        //new("Search tasks by team member id",),
+        new("Search", Search),
+        new("Filtering", Filtering),
     };
 
-    public static KeyValuePair<string, SearchController.SearchTaskBy>[] MenuManageSearchTask =
+    public static KeyValuePair<string, WindowManager.MenuMethod>[] MenuManageSearchTask =
     {
-        new("Search task by all", SearchController.SearchTaskBy.All),
-        new("Search task by ID", SearchController.SearchTaskBy.ID),
-        new("Search task by title", SearchController.SearchTaskBy.Title),
-        new("Search task by deadline", SearchController.SearchTaskBy.Deadline),
-        new("Search task by description", SearchController.SearchTaskBy.Description),
+        new("Task by team member id", SearchTask),
+        new("Team member by task id", SearchTeamMember)
     };
 
-    public static KeyValuePair<string, SearchController.SearchTeamMemberBy>[] MenuManageSearchTeamMember =
+    public static KeyValuePair<string, SearchController.FilterTaskType>[] MenuManageSearchTeamMember =
     {
-        new("Search team member by all", SearchController.SearchTeamMemberBy.All),
-        new("Search team member by ID", SearchController.SearchTeamMemberBy.ID),
-        new("Search team member by name", SearchController.SearchTeamMemberBy.Name),
-        new("Search team member by email", SearchController.SearchTeamMemberBy.Email),
+        new("Filter by status 'done'", SearchController.FilterTaskType.Done),
+        new("Filter by status 'not done'", SearchController.FilterTaskType.NotDone),
+        new("Filter by deadline 'active'", SearchController.FilterTaskType.DeadlineLess),
+        new("Filter by deadline 'pass'", SearchController.FilterTaskType.DeadlineMore),
     };
 
     internal static void SearchTask()
     {
-        WindowManager.ShowTitle("Search Task");
-        WindowManager.ShowMenu("choose", Array.ConvertAll(MenuManageSearchTask, element => element.Key));
+        WindowManager.ShowTitle("Task by team member id");
+        
+        uint searchText = uint.Parse(WindowManager.GetData(
+            message: "Type team member id",
+            helperText: ""));
 
-        string input = WindowManager.GetData(
-            message: "Type number",
-            helperText: "",
-            validator: (inputData) => Int32.TryParse(inputData, out int result) && result < MenuManageSearchTask.Length);
+        List<uint> result =  WindowProject.searchController.SearchTaskByTeamMember(searchText);
 
-        SearchController.SearchTaskBy searchType = MenuManageSearchTask[Int32.Parse(input)].Value;
+        List<TaskView> taskViews = result.ConvertAll((id) => WindowProject.taskController.GetTaskInfo(id));
 
-        WindowManager.ShowTitle(MenuManageSearchTask[Int32.Parse(input)].Key);
-
-        string searchText = WindowManager.GetData(
-            message: "Type search te",
-            helperText: "");
-
-        List<TaskView> result =  WindowProject.controller.searchController.SearchTask(searchText, searchType);
-
-        result.Sort((x, y) => Convert.ToInt32(x.ID) - Convert.ToInt32(y.ID));
-
-        string tableHeader = $" ID  | ";
-        tableHeader += $"{"Deadline".PadRight(10, ' ')} | ";
-        tableHeader += $"{"Title".PadRight(20, ' ')} | ";
-        tableHeader += $"Description";
-        WindowManager.ShowMessage(tableHeader);
-
-        foreach (TaskView view in result)
-        {
-            string line = WindowTasks.PrepareTaskInformation(view);
-            WindowManager.ShowMessage(line);
-        }
+        WindowTasks.ShowTaskInfo(taskViews);
     }
 
     internal static void SearchTeamMember()
     {
-        WindowManager.ShowTitle("Search Team Member");
+        WindowManager.ShowTitle("Team member by task id");
+
+        uint searchText = uint.Parse(WindowManager.GetData(
+                  message: "Type task id",
+                  helperText: ""));
+
+        List<uint> result = WindowProject.searchController.SearchTeamMemberByTask(searchText);
+
+        List<TeamMemberView> teamMemberViews = result.ConvertAll((id) => WindowProject.teamMemberController.GetTeamMemberInfo(id));
+    
+        WindowTeamMembers.ShowTeamMemberInfo(teamMemberViews);
+    }
+
+    internal static void Search()
+    {
+        WindowManager.ShowTitle("Search");
+        WindowManager.SelectMenu(MenuManageSearchTask);
+    }    
+    
+    internal static void Filtering()
+    {
+        WindowManager.ShowTitle("Filtering");
+        WindowManager.SelectMenu(MenuManageSearchTask);
+
         WindowManager.ShowMenu("choose", Array.ConvertAll(MenuManageSearchTeamMember, element => element.Key));
 
         string input = WindowManager.GetData(
@@ -74,28 +72,13 @@ internal static class WindowSearch
             helperText: "",
             validator: (inputData) => Int32.TryParse(inputData, out int result) && result < MenuManageSearchTeamMember.Length);
 
-        SearchController.SearchTeamMemberBy searchType = MenuManageSearchTeamMember[Int32.Parse(input)].Value;
+        SearchController.FilterTaskType searchType = MenuManageSearchTeamMember[Int32.Parse(input)].Value;
 
         WindowManager.ShowTitle(MenuManageSearchTask[Int32.Parse(input)].Key);
 
-        string searchText = WindowManager.GetData(
-            message: "Type search te",
-            helperText: "");
+        List<uint> tasksId = WindowProject.searchController.FilterTaskBy(searchType);
+        List<TaskView> result = tasksId.ConvertAll((id) => WindowProject.taskController.GetTaskInfo(id));
 
-        List<TeamMemberView> result = WindowProject.controller.searchController.SearchTeamMember(searchText, searchType);
-
-        result.Sort((x, y) => Convert.ToInt32(x.ID) - Convert.ToInt32(y.ID));
-
-        string tableHeader = $" ID  | ";
-        tableHeader += $"{"Deadline".PadRight(10, ' ')} | ";
-        tableHeader += $"{"Title".PadRight(20, ' ')} | ";
-        tableHeader += $"Description";
-        WindowManager.ShowMessage(tableHeader);
-
-        foreach (TeamMemberView view in result)
-        {
-            string line = WindowTeamMembers.PrepareTeamMemberInformation(view);
-            WindowManager.ShowMessage(line);
-        }
+        WindowTasks.ShowTaskInfo(result);
     }
 }

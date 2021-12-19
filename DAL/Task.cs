@@ -11,8 +11,8 @@ public class Task
     private TaskStatus _status = new();
 
     #region Regular Expressions
-    private readonly static string regTitle = "";
-    private readonly static string regDescription = "";
+    private readonly static string regTitle = @"^[a-zA-Z0-9 ]{3,20}$";
+    private readonly static string regDescription = "^.{3,50}$$";
     #endregion
 
     #region Properties
@@ -24,12 +24,12 @@ public class Task
     public string Title
     {
         get => _title;
-        set => _title = Regex.IsMatch(value, regTitle) ? value : throw new Exception();
+        set => _title = Regex.IsMatch(value, regTitle) ? value : throw new Exception("Invalid symbols");
     }
     public string Description
     {
         get => _description;
-        set => _description = Regex.IsMatch(value, regDescription) ? value : throw new Exception();
+        set => _description = Regex.IsMatch(value, regDescription) ? value : throw new Exception("Invalid symbols");
     }
     public DateTime Deadline
     {

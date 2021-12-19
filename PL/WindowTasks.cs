@@ -10,7 +10,7 @@ public class WindowTasks
         new("Add task", AddTask),
         new("Edit task", EditTask),
         new("Delete task", DeleteTask),
-        new("Show all tasks", ShowAllTasksInfo),
+        new("Get all tasks", GetAllTasksInfo),
     };
 
 
@@ -20,24 +20,24 @@ public class WindowTasks
 
         string title = WindowManager.GetData(
             message: "Type task title",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Avalaible only 'space', numbers and letters (from 3 to 20 symbols)",
+            (inputData) => Regex.IsMatch(inputData, @"^[a-zA-Z0-9 ]{3,20}$")
         );
 
         string deadline = WindowManager.GetData(
             message: "Type task deadline",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Avalaible only this structure 'yyyy-mm-dd hh:mm'",
+            (inputData) => Regex.IsMatch(inputData, @"^\d\d\d\d-\d\d-\d\d \d\d:\d\d$")
         );
 
         string description = WindowManager.GetData(
             message: "Type task description",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Avalaible all symbols (from 3 to 50 symbols)",
+            (inputData) => Regex.IsMatch(inputData, "^.{3,50}$")
         );
 
 
-        WindowProject.controller.taskController.CreateTask(title, deadline, description);
+        WindowProject.taskController.CreateTask(title, deadline, description);
         WindowProject.ManageProject();
     }
 
@@ -47,35 +47,35 @@ public class WindowTasks
 
         uint id = uint.Parse(WindowManager.GetData(
             message: "Task ID",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Only numbers",
+            (inputData) => Regex.IsMatch(inputData, @"\d{1,}")
         ));
 
         string title = WindowManager.GetData(
             message: "Type task title",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Avalaible only 'space', letters and numbers (from 3 to 20 symbols)",
+        (inputData) => Regex.IsMatch(inputData, @"^[a-zA-Z0-9 ]{3,20}$|^$")
         );
 
         string deadline = WindowManager.GetData(
             message: "Type task deadline",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Avalaible only this structure 'yyyy-mm-dd hh:mm'",
+            (inputData) => Regex.IsMatch(inputData, @"^\d\d\d\d-\d\d-\d\d \d\d:\d\d$|^$")
         );
 
         string status = WindowManager.GetData(
             message: "Type task status",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Avalaible only letters",
+            (inputData) => Regex.IsMatch(inputData, "^[a-zA-Z]*$|^$")
         );
 
         string description = WindowManager.GetData(
             message: "Type task description",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Avalaible all symbols (from 3 to 50 symbols)",
+            (inputData) => Regex.IsMatch(inputData, "^.{3,50}$|^$")
         );
 
-        WindowProject.controller.taskController.EditTask(
+        WindowProject.taskController.EditTask(
             taskID: id,
             title: title,
             description: description,
@@ -92,45 +92,51 @@ public class WindowTasks
 
         uint id = uint.Parse(WindowManager.GetData(
             message: "Task ID",
-            helperText: "",
-            (inputData) => Regex.IsMatch(inputData, "")
+            helperText: "Only numbers",
+            (inputData) => Regex.IsMatch(inputData, @"^\d{1,}$")
         ));
 
-        WindowProject.controller.taskController.DeleteTask(id);
+        WindowProject.taskController.DeleteTask(id);
 
         WindowProject.ManageProject();
     }
 
-    internal static void ShowAllTasksInfo()
+    internal static void GetAllTasksInfo()
     {
         WindowManager.ShowTitle("All members");
 
-        List<TaskView> result = WindowProject.controller.taskController.GetAllTaskInfo();
+        List<TaskView> result = WindowProject.taskController.GetAllTaskInfo();
 
-        result.Sort((x, y) => Convert.ToInt32(x.ID) - Convert.ToInt32(y.ID));
-
-        string tableHeader = $" ID  | ";
-        tableHeader += $"{"Deadline".PadRight(10, ' ')} | ";
-        tableHeader += $"{"Title".PadRight(20, ' ')} | ";
-        tableHeader += $"Description";
-        WindowManager.ShowMessage(tableHeader);
-
-        foreach (TaskView view in result)
-        {
-            string line = PrepareTaskInformation(view);
-            WindowManager.ShowMessage(line);
-        }
+        ShowTaskInfo(result);
     }
 
-    internal static string PrepareTaskInformation(TaskView task)
+    internal static void ShowTaskInfo(List<TaskView> views)
     {
-        string result = "";
+        views.Sort((x, y) => Convert.ToInt32(x.ID) - Convert.ToInt32(y.ID));
 
-        result += $"{task.ID.ToString().PadLeft(3, '0')} | ";
-        result += $"{task.Deadline.ToString().PadRight(10, ' ')} | ";
-        result += $"{task.Title.PadRight(20, ' ')} | ";
-        result += $"{task.Description}";
+        string tableHeader = $" ID  | ";
+        tableHeader += $"{"Deadline",-30} | ";
+        tableHeader += $"{"Status",-10} | ";
+        tableHeader += $"{"Title",-20} | ";
+        tableHeader += $"Description";
 
-        return result;
+        WindowManager.ShowMessage(tableHeader);
+
+        foreach (TaskView view in views)
+        {
+            string line = "";
+
+            line += $"{view.ID.ToString().PadLeft(4, '0')} | ";
+            line += $"{view.Deadline,-30} | ";
+            line += $"{view.Status,-10} | ";
+            line += $"{view.Title,-20} | ";
+            line += $"{view.Description}";
+
+            WindowManager.ShowMessage(line);
+        }
+
+        Console.ReadKey();
+
+        WindowProject.ManageProject();
     }
 }

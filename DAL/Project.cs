@@ -11,24 +11,24 @@ public class Project
     private readonly List<TeamMember> _teamMembers = new();
     private readonly List<TaskTeamMember> _taskTeamMembers = new();
 
-    private string _name = "";
-    private string _description = "";
+    private string _name = @"^[a-zA-Z0-9 ]{3,20}$";
+    private string _description = "^[~!@#$%^&*()_+'\"\\-/=a-zA-Z0-9]{3,50}$";
 
     #region Regular Expressions
-    public static string regName = ""; 
-    public static string regDescription = "";
+    private readonly static string _regName = "";
+    private readonly static string _regDescription = "";
     #endregion
 
     #region Properties
     public string Name
     {
         get => _name;
-        set => _name = Regex.IsMatch(value, regName) ? value : throw new Exception();
+        set => _name = Regex.IsMatch(value, _regName) ? value : throw new Exception("Invalid symbols");
     }
     public string Description
     {
         get => _description;
-        set => _description = Regex.IsMatch(value, regDescription) ? value : throw new Exception();
+        set => _description = Regex.IsMatch(value, _regDescription) ? value : throw new Exception("Invalid symbols");
     }
     #endregion
 
@@ -36,7 +36,7 @@ public class Project
     #region Create
     public void AddTask(Task newTask)
     {
-        if (_tasks.Exists(task => task.ID == newTask.ID)) throw new Exception();
+        if (_tasks.Exists(task => task.ID == newTask.ID)) throw new Exception("This task already exists");
 
         _tasks.Add(newTask);
 
@@ -44,7 +44,7 @@ public class Project
     }
     public void AddTeamMember(TeamMember newTeamMembers)
     {
-        if (_teamMembers.Exists(taskStatus => taskStatus.ID == newTeamMembers.ID)) throw new Exception();
+        if (_teamMembers.Exists(taskStatus => taskStatus.ID == newTeamMembers.ID)) throw new Exception("This team member already exists");
 
         _teamMembers.Add(newTeamMembers);
 
@@ -53,7 +53,7 @@ public class Project
     public void AddTaskTeamMember(uint taskID, uint teamMemberID)
     {
         if (_taskTeamMembers.Exists(dependency => dependency.TaskID == taskID && dependency.TeamMemberID == teamMemberID))
-            throw new Exception();
+            throw new Exception("This 'task - team member' dependency already exists");
 
         _taskTeamMembers.Add(new TaskTeamMember(taskID, teamMemberID));
 
@@ -72,7 +72,7 @@ public class Project
     {
         Task? task = _tasks.Find(task => task.ID == updatedTask.ID);
 
-        if (task is null) throw new Exception();
+        if (task is null) throw new Exception("This task doesn't exists");
 
         _tasks.Remove(task);
         _tasks.Add(updatedTask);
@@ -84,7 +84,7 @@ public class Project
     {
         TeamMember? teamMembar = _teamMembers.Find(teamMember => teamMember.ID == updatedTaeamMember.ID);
 
-        if (teamMembar is null) throw new Exception();
+        if (teamMembar is null) throw new Exception("This team member doesn't exists");
 
         _teamMembers.Remove(teamMembar);
         _teamMembers.Add(teamMembar);
@@ -115,7 +115,7 @@ public class Project
     public void RemoveTaskTeamMember(uint taskID, uint teamMemberID)
     {
         if (!_taskTeamMembers.Exists(dependency => dependency.TaskID == taskID && dependency.TeamMemberID == teamMemberID))
-            throw new Exception();
+            throw new Exception("This 'task - team member' dependency doesn't exists");
 
         _taskTeamMembers.Remove(new TaskTeamMember(taskID, teamMemberID));
 

@@ -13,17 +13,13 @@ public class ProjectController
     public readonly TeamMemberController teamMemberController;
     public readonly SearchController searchController;
 
-    public string ProjectName => _project.Name;
-
-    public string ProjectDescription => _project.Description;
-
     public ProjectController(string projectFilePath)
     {
         _provider = SelectProvider(projectFilePath);
 
         _projectFilePath = projectFilePath;
 
-        _project = _provider.Read(projectFilePath) as Project ?? throw new Exception();
+        _project = _provider.Read(projectFilePath) as Project ?? throw new Exception("Invalid document structure");
 
         _project.Notify += UpdateProjectFile;
 
@@ -52,6 +48,47 @@ public class ProjectController
         searchController = new(_project);
         teamMemberController = new(_project);
     }
+
+    public ProjectView GetProjectInfo()
+    {
+        return new(_project);
+    }
+
+    public void SetExecutant(uint teamMemberID, uint taskID)
+    {
+        _project.AddTaskTeamMember(teamMemberID, taskID);
+        UpdateProjectFile();
+    }
+
+    public void ChangeTaskStatus(uint taskID, string taskStatus)
+    {
+        DAL.Task? task = _project.Tasks.Find(x => x.ID == taskID);
+
+        if (task is null) throw new Exception("No such task");
+
+        task.Status.CurrentStatus = Enum.Parse<DAL.TaskStatus.StatusType>(taskStatus);
+
+        _project.UpdateTask(task);
+    }
+
+    public List<LoadOfExecutant> CheckLoadOfExecutants()
+    {
+        List<LoadOfExecutant> result = new();
+
+        foreach (TeamMember teamMember in _project.TeamMembers)
+        {
+            int count = 0;
+
+            foreach (TaskTeamMember taskTeamMember in _project.TaskTeamMembers)
+                if (taskTeamMember.TeamMemberID == teamMember.ID)
+                    count++;
+
+            result.Add(new(teamMember, count));
+        }
+
+        return result;
+    }
+
 
     private void UpdateProjectFile()
     {

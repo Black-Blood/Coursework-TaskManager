@@ -10,7 +10,7 @@ public class TaskStatus
     }
 
     private StatusType _currentStatus = StatusType.New;
-    private List<StatusType> _history = new();
+    private readonly List<StatusType> _history = new();
 
     public StatusType CurrentStatus
     {

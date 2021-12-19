@@ -5,7 +5,7 @@ internal static class WindowManager
     internal delegate bool ValidateMethod(string inputData);
     internal delegate void MenuMethod();
 
-    private static readonly int _windowWidth = 75;
+    private static readonly int _windowWidth = Console.WindowWidth;
 
     internal static void Clear()
     {
